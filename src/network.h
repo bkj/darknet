@@ -2,6 +2,10 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "image.h"
 #include "layer.h"
 #include "data.h"
@@ -125,5 +129,8 @@ float get_network_cost(network net);
 int get_network_nuisance(network net);
 int get_network_background(network net);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
 

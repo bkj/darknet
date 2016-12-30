@@ -1,5 +1,10 @@
 #ifndef COST_LAYER_H
 #define COST_LAYER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "layer.h"
 #include "network.h"
 

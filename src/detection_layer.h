@@ -1,6 +1,10 @@
 #ifndef DETECTION_LAYER_H
 #define DETECTION_LAYER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "layer.h"
 #include "network.h"
 
@@ -16,4 +20,7 @@ void forward_detection_layer_gpu(const detection_layer l, network_state state);
 void backward_detection_layer_gpu(detection_layer l, network_state state);
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 #endif

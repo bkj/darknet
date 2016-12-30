@@ -1,6 +1,10 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <float.h>
@@ -83,5 +87,9 @@ image get_image_layer(image m, int l);
 
 void free_image(image m);
 void test_resize(char *filename);
+
+#ifdef __cplusplus
+}
+#endif
 #endif
 
