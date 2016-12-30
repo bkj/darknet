@@ -129,6 +129,8 @@ float get_network_cost(network net);
 int get_network_nuisance(network net);
 int get_network_background(network net);
 
+layer get_network_detection_layer(network net);
+
 #ifdef __cplusplus
 }
 #endif
