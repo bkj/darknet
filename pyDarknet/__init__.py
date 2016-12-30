@@ -1,32 +1,25 @@
-from libpydarknet import DarknetObjectDetector
+from detector import Darknet_ObjectDetector as ObjectDetector
+from detector import DetBBox
 
+import requests
 from PIL import Image
-import numpy as np
-import time
+from PIL import ImageFilter
+from StringIO import StringIO
+import cv2
+def _get_image(url):
+    return Image.open(StringIO(requests.get(url).content))
 
-class DetBBox(object):
+if __name__ == '__main__':
+    ObjectDetector.set_device(0)
+    
+    from PIL import Image
+    voc_names = ["aeroplane", "bicycle", "bird", "boat", "bottle","bus", "car", "cat", "chair", "cow", "diningtable","dog", "horse", "motorbike", "person", "pottedplant","sheep", "sofa", "train", "tvmonitor"]
+    det = ObjectDetector('../cfg/yolo.cfg','./yolov1.weights')
+    
+    img = Image.open("../data/dog.jpg")
+    
+    rst, run_time = det.detect_object(img)
+    print 'got {} objects in {} seconds'.format(len(rst), run_time)
 
-    def __init__(self, bbox):
-        self.left = bbox.left
-        self.right = bbox.right
-        self.top = bbox.top
-        self.bottom = bbox.bottom
-        self.confidence = bbox.confidence
-        self.cls = bbox.cls
-
-class Darknet_ObjectDetector():
-
-    def __init__(self, spec, weight):
-        self._detector = DarknetObjectDetector(spec, weight)
-
-    def detect_object(self, pil_image):
-        start = time.time()
-        data = np.array(pil_image).transpose([2,0,1]).astype(np.uint8)
-        rst = self._detector.detect_object(data.tostring(), pil_image.size[0], pil_image.size[1], 3)
-        end = time.time()
-        ret_rst = [DetBBox(x) for x in rst]
-        return ret_rst, end-start
-
-    @staticmethod
-    def set_device(gpu_id):
-        DarknetObjectDetector.set_device(gpu_id)
+    for bbox in rst:
+        print '{} {} {} {} {} {}'.format(voc_names[bbox.cls], bbox.top, bbox.left, bbox.bottom, bbox.right, bbox.confidence)
