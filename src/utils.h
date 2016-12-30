@@ -1,5 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <time.h>
 #include "list.h"
@@ -60,5 +65,8 @@ char *find_char_arg(int argc, char **argv, char *arg, char *def);
 int sample_array(float *a, int n);
 void print_statistics(float *a, int n);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
 
