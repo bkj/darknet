@@ -2,10 +2,6 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "image.h"
 #include "layer.h"
 #include "data.h"
@@ -86,6 +82,10 @@ float *get_network_output_gpu(network net);
 void forward_network_gpu(network net, network_state state);
 void backward_network_gpu(network net, network_state state);
 void update_network_gpu(network net);
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 float get_current_rate(network net);

@@ -1,10 +1,6 @@
 #ifndef BOX_H
 #define BOX_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct{
     float x, y, w, h;
 } box;
@@ -22,7 +18,4 @@ void do_nms_sort(box *boxes, float **probs, int total, int classes, float thresh
 box decode_box(box b, box anchor);
 box encode_box(box b, box anchor);
 
-#ifdef __cplusplus
-}
-#endif
 #endif
