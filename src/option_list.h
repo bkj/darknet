@@ -8,6 +8,9 @@ typedef struct{
     int used;
 } kvp;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 list *read_data_cfg(char *filename);
 int read_option(char *s, list *options);
@@ -20,4 +23,7 @@ float option_find_float(list *l, char *key, float def);
 float option_find_float_quiet(list *l, char *key, float def);
 void option_unused(list *l);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
