@@ -52,9 +52,12 @@ LIST(REMOVE_ITEM SRC_FILES "${PROJECT_SOURCE_DIR}/src/cpu_gemm.c")
 #LIST(REMOVE_ITEM SRC_FILES "${PROJECT_SOURCE_DIR}/src/darknet.c")
 
 message(STATUS "CUDA FOUND")
+
 cuda_add_library(dnl SHARED ${SRC_FILES} ${CU_SRC_FILES})
 target_link_libraries(dnl ${LIBRARIES} ${OpenCV_LIBS})
+
 cuda_add_executable(darknet ${SRC_DIR}/darknet.c)
 target_link_libraries(darknet ${LIBRARIES} ${OpenCV_LIBS} dnl)
+
 cuda_add_library(pydarknet SHARED ${SRC_DIR}/pydarknet.cpp)
 target_link_libraries(pydarknet dnl ${LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${OpenCV_LIBS} )

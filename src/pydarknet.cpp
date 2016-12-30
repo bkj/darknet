@@ -112,7 +112,7 @@ public:
 		string weight_c_name = string(((const char*)bp::extract<const char*>(weight_name)));
 		cout << "loading network spec from" << cfg_c_name << '\n';
 		net = parse_network_cfg((char*)cfg_c_name.c_str());
-
+		
 		// cout << "loading network weights from" << weight_c_name << '\n';
 		// load_weights(&net, (char*)weight_c_name.c_str());
 
@@ -192,51 +192,51 @@ public:
 
 private:
 
-	bp::list parse_yolo_detection(float *box, int side,
-		int objectness, float thresh,
-		int im_width, int im_height)
-	{
-		int classes = 20;
-		int elems = 4 + classes + objectness;
-		int j;
-		int r, c;
+	// bp::list parse_yolo_detection(float *box, int side,
+	// 	int objectness, float thresh,
+	// 	int im_width, int im_height)
+	// {
+	// 	int classes = 20;
+	// 	int elems = 4 + classes + objectness;
+	// 	int j;
+	// 	int r, c;
 
-		bp::list ret_list = bp::list();
+	// 	bp::list ret_list = bp::list();
 
-		for (r = 0; r < side; ++r){
-			for (c = 0; c < side; ++c){
-				j = (r*side + c) * elems;
-				float scale = 1;
-				if (objectness) scale = 1 - box[j++];
-				int cls = max_index(box + j, classes);
-				if (scale * box[j + cls] > thresh){
-					//valid detection over threshold
-					float conf = scale * box[j + cls];
-					//            printf("%f %s\n", conf, voc_class_names[cls].c_str());
+	// 	for (r = 0; r < side; ++r){
+	// 		for (c = 0; c < side; ++c){
+	// 			j = (r*side + c) * elems;
+	// 			float scale = 1;
+	// 			if (objectness) scale = 1 - box[j++];
+	// 			int cls = max_index(box + j, classes);
+	// 			if (scale * box[j + cls] > thresh){
+	// 				//valid detection over threshold
+	// 				float conf = scale * box[j + cls];
+	// 				//            printf("%f %s\n", conf, voc_class_names[cls].c_str());
 
-					j += classes;
-					float x = box[j + 0];
-					float y = box[j + 1];
-					x = (x + c) / side;
-					y = (y + r) / side;
-					float w = box[j + 2]; //*maxwidth;
-					float h = box[j + 3]; //*maxheight;
-					h = h*h;
-					w = w*w;
+	// 				j += classes;
+	// 				float x = box[j + 0];
+	// 				float y = box[j + 1];
+	// 				x = (x + c) / side;
+	// 				y = (y + r) / side;
+	// 				float w = box[j + 2]; //*maxwidth;
+	// 				float h = box[j + 3]; //*maxheight;
+	// 				h = h*h;
+	// 				w = w*w;
 
-					int left = (x - w / 2)*im_width;
-					int right = (x + w / 2)*im_width;
-					int top = (y - h / 2)*im_height;
-					int bottom = (y + h / 2)*im_height;
+	// 				int left = (x - w / 2)*im_width;
+	// 				int right = (x + w / 2)*im_width;
+	// 				int top = (y - h / 2)*im_height;
+	// 				int bottom = (y + h / 2)*im_height;
 
-					BBox bbox = { left, right, top, bottom, conf, cls };
-					ret_list.append<BBox>(bbox);
-				}
-			}
-		}
+	// 				BBox bbox = { left, right, top, bottom, conf, cls };
+	// 				ret_list.append<BBox>(bbox);
+	// 			}
+	// 		}
+	// 	}
 
-		return ret_list;
-	}
+	// 	return ret_list;
+	// }
 
 	network net;
 	detection_layer layer;
