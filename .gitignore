@@ -1,3 +1,9 @@
+pyDarknet/data
+build/*
+*.weights
+*.so
+*.pyc
+
 *.o
 *.dSYM
 *.csv
