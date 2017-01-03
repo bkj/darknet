@@ -1,3 +1,7 @@
+darknet19_448.conv.23
+VOCdevkit/
+custom-tools/pfr-data/
+custom-tools/source-data/
 pyDarknet/data
 build/*
 *.weights
