@@ -31,19 +31,14 @@ typedef struct BBox{
 	int cls;
 } _BBox;
 
-void draw_detections_bbox(image im, int num, float thresh, box *boxes, 
-	float **probs, int classes, vector<_BBox> &bb) {
+void compute_detections_bbox(image im, int num, float thresh, box *boxes, 
+	float **probs, int classes, vector<_BBox> &bb, int draw) {
 	int i;
 
 	for (i = 0; i < num; ++i){
 		int classs = max_index(probs[i], classes);
 		float prob = probs[i][classs];
 		if (prob > thresh){
-			int width = pow(prob, 1. / 2.) * 10 + 1;
-			int offset = classs * 17 % classes;
-			float red = get_color(0, offset, classes);
-			float green = get_color(1, offset, classes);
-			float blue = get_color(2, offset, classes);
 			box b = boxes[i];
 			
 			int left = (b.x - b.w / 2.)*im.w;
@@ -57,10 +52,23 @@ void draw_detections_bbox(image im, int num, float thresh, box *boxes,
 			if (bot > im.h - 1) bot = im.h - 1;
 			
 			_BBox bs;
-			bs.left = left; bs.right = right; bs.top = top; bs.bottom = bot; bs.confidence = prob; bs.cls = classs;
+			bs.left = left; 
+			bs.right = right; 
+			bs.top = top; 
+			bs.bottom = bot; 
+			bs.confidence = prob; 
+			bs.cls = classs;
 			bb.push_back(bs);
-
-			draw_box_width(im, left, top, right, bot, width, red, green, blue);
+			
+			if(draw) {
+				int width = pow(prob, 1. / 2.) * 10 + 1;
+				int offset = classs * 17 % classes;
+				float red = get_color(0, offset, classes);
+				float green = get_color(1, offset, classes);
+				float blue = get_color(2, offset, classes);			
+				draw_box_width(im, left, top, right, bot, width, red, green, blue);
+				save_image(im, "predictions");
+			}
 		}
 	}
 }
@@ -70,6 +78,7 @@ class DarknetObjectDetector{
 private:
 	float thresh;
 	float nms;
+	bool draw;
 	
 	network net;
 	layer l;
@@ -78,10 +87,13 @@ private:
 	float **probs;
 
 public:
-	DarknetObjectDetector(bp::str cfg_name, bp::str weight_name){
-
-		nms = 0.4f;
-		thresh = 0.24;
+	DarknetObjectDetector(bp::str cfg_name, bp::str weight_name, float thresh_, float nms_, int draw_){
+		
+		std::cout << thresh_ << std::endl;
+		
+		nms = nms_;
+		thresh = thresh_;
+		draw = draw_;
 
 		// Load config
 		string cfg_c_name = string(((const char*)bp::extract<const char*>(cfg_name)));
@@ -126,8 +138,7 @@ public:
         if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
 		
 		// Draw
-		draw_detections_bbox(im, l.w*l.h*l.n, thresh, boxes, probs, l.classes, bboxes);
-        save_image(im, "predictions");
+		compute_detections_bbox(im, l.w*l.h*l.n, thresh, boxes, probs, l.classes, bboxes, draw);
 
 		// Clean up        
 		free_image(im);
@@ -164,7 +175,7 @@ public:
 
 BOOST_PYTHON_MODULE(libpydarknet)
 {
-	bp::class_<DarknetObjectDetector>("DarknetObjectDetector", bp::init<bp::str, bp::str>())
+	bp::class_<DarknetObjectDetector>("DarknetObjectDetector", bp::init<bp::str, bp::str, float, float, int>())
 		.def("detect_object", &DarknetObjectDetector::detect_object)
 		.def("set_device", &DarknetObjectDetector::set_device)
 		.staticmethod("set_device");
