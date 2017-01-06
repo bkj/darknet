@@ -1,3 +1,12 @@
+"""
+    detector.py
+    
+    Python wrapper for `darknet` object detector
+    
+    !! Resizing in python yields __nearly__ equivalent results to resizing in `darknet`
+    but is much faster.
+"""
+
 from libpydarknet import DarknetObjectDetector
 
 import sys
