@@ -16,7 +16,7 @@ class DetBBox(object):
 
 class Darknet_ObjectDetector():
 
-    def __init__(self, spec, weight, thresh=0.5, nms=0.4, draw=0, py_resize=False, net_size=416):
+    def __init__(self, spec, weight, thresh=0.5, nms=0.4, draw=0, py_resize=True, net_size=416):
         self._detector = DarknetObjectDetector(spec, weight, thresh, nms, draw)
         self.py_resize = py_resize
         self.net_size = net_size
@@ -31,9 +31,9 @@ class Darknet_ObjectDetector():
     def detect_object(self, data, size):
         res = self._detector.detect_object(data, size[0], size[1], 3)
         out = [DetBBox(x) for x in res.content], res.load_time, res.pred_time
-        if self.py_resize:
-            print >> sys.stderr, "!! BBOX is in transformed dimensions -- need to implement fix"
-            pass
+        # if self.py_resize:
+            # print >> sys.stderr, "!! BBOX is in transformed dimensions -- need to implement fix"
+            # pass
         
         return out
     
