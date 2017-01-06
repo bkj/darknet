@@ -131,7 +131,7 @@ public:
 		network_predict(net, sized.data);
 		
 		// Get + filter boxes
-        get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0);
+        get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, 0.5);
         if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
 		
 		// Draw
