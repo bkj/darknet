@@ -52,6 +52,8 @@ if __name__ == "__main__":
                 class_name = class_names[bbox.cls]
                 res = [im_name, class_name, bbox.confidence, bbox.top, bbox.left, bbox.bottom, bbox.right]
                 print '\t'.join(map(str, res))
+                sys.stdout.flush()
+        
         except KeyboardInterrupt:
             raise
         except:

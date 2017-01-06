@@ -88,9 +88,6 @@ private:
 
 public:
 	DarknetObjectDetector(bp::str cfg_name, bp::str weight_name, float thresh_, float nms_, int draw_){
-		
-		std::cout << thresh_ << std::endl;
-		
 		nms = nms_;
 		thresh = thresh_;
 		draw = draw_;
