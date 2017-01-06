@@ -6,6 +6,7 @@
 #include <boost/python.hpp>
 #include <Python.h>
 #include <vector>
+#include <time.h>
 
 #include "network.h"
 #include "region_layer.h"
@@ -30,6 +31,13 @@ typedef struct BBox{
 	float confidence;
 	int cls;
 } _BBox;
+
+typedef struct Response {
+	float load_time;
+	float pred_time;
+	bp::list content;
+} _Response;
+
 
 void compute_detections_bbox(image im, int num, float thresh, box *boxes, 
 	float **probs, int classes, vector<_BBox> &bb, int draw) {
@@ -113,22 +121,35 @@ public:
 		}
 	};
 
-	bp::list detect_object(bp::str img_data, int img_width, int img_height, int img_channel){
+	Response detect_object(bp::str img_data, int img_width, int img_height, int img_channel){
 		bp::list ret_list = bp::list();
 		vector<_BBox> bboxes;
-
+		image im, sized;
+		
 		// Load image
+		clock_t load_start = clock();
 		const unsigned char* data = (const unsigned char*)((const char*)bp::extract<const char*>(img_data));
 		assert(img_channel == 3);
-		image im = make_image(img_width, img_height, img_channel);
-		int cnt = img_height * img_channel * img_width;
-		for (int i = 0; i < cnt; ++i){
+		
+		im = make_image(img_width, img_height, img_channel);
+		
+		for (int i = 0; i < (img_height * img_channel * img_width); ++i){
 			im.data[i] = (float)data[i] / 255.;
 		}
-		image sized = resize_image(im, net.w, net.h);
+		
+		bool resized = (img_width != net.w) || (img_height != net.h);
+		if (resized) {
+			sized = resize_image(im, net.w, net.h);
+		}			
+		clock_t load_time = clock() - load_start;
 		
 		// Predict
-		network_predict(net, sized.data);
+		clock_t pred_start = clock();
+		if(resized) {
+			network_predict(net, sized.data);
+		} else {
+			network_predict(net, im.data);
+		}
 		
 		// Get + filter boxes
         get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, 0.5);
@@ -136,16 +157,25 @@ public:
 		
 		// Draw
 		compute_detections_bbox(im, l.w*l.h*l.n, thresh, boxes, probs, l.classes, bboxes, draw);
+		clock_t pred_time = clock() - pred_start;
 
 		// Clean up        
 		free_image(im);
-		free_image(sized);
+		if(resized) {
+			free_image(sized);
+		}
 		
 		// Return 
 		for (int i = 0; i < bboxes.size(); i++) {
 			ret_list.append<BBox>(bboxes[i]);
 		}
-		return ret_list;
+		
+		_Response res;
+		res.load_time = (float)sec(load_time);
+		res.pred_time = (float)sec(pred_time);
+		res.content = ret_list;
+		
+		return res;
 	};
 
 	static void set_device(int dev_id) {
@@ -184,4 +214,10 @@ BOOST_PYTHON_MODULE(libpydarknet)
 		.def_readonly("bottom", &BBox::bottom)
 		.def_readonly("confidence", &BBox::confidence)
 		.def_readonly("cls", &BBox::cls);
+
+	bp::class_<Response>("Response")
+		.def_readonly("load_time", &Response::load_time)
+		.def_readonly("pred_time", &Response::pred_time)
+		.def_readonly("content", &Response::content);
+
 }

@@ -7,6 +7,8 @@
 #include "demo.h"
 #include "option_list.h"
 
+#include <time.h>
+
 #ifdef OPENCV
 #include "opencv2/highgui/highgui_c.h"
 #endif
@@ -296,7 +298,7 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
     float thresh = .005;
     float nms = .45;
 
-    int nthreads = 8;
+    int nthreads = 1;
     image *val = calloc(nthreads, sizeof(image));
     image *val_resized = calloc(nthreads, sizeof(image));
     image *buf = calloc(nthreads, sizeof(image));
@@ -314,9 +316,17 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
         args.resized = &buf_resized[t];
         thr[t] = load_data_in_thread(args);
     }
-    time_t start = time(0);
+    
+    struct timespec start, finish, load_start, load_finish, img_start, img_finish;
+    double total_elapsed, load_elapsed, img_elapsed;
+    load_elapsed = 0;
+    img_elapsed = 0;
+    
+    clock_gettime(CLOCK_MONOTONIC, &start);
     for(i = nthreads; i < m+nthreads; i += nthreads){
         fprintf(stderr, "%d\n", i);
+        
+        clock_gettime(CLOCK_MONOTONIC, &load_start);
         for(t = 0; t < nthreads && i+t-nthreads < m; ++t){
             pthread_join(thr[t], 0);
             val[t] = buf[t];
@@ -328,6 +338,11 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
             args.resized = &buf_resized[t];
             thr[t] = load_data_in_thread(args);
         }
+        clock_gettime(CLOCK_MONOTONIC, &load_finish);
+        load_elapsed += (load_finish.tv_sec - load_start.tv_sec);
+        load_elapsed += (load_finish.tv_nsec - load_start.tv_nsec) / 1000000000.0;
+        
+        clock_gettime(CLOCK_MONOTONIC, &img_start);
         for(t = 0; t < nthreads && i+t-nthreads < m; ++t){
             char *path = paths[i+t-nthreads];
             char *id = basecfg(path);
@@ -348,6 +363,10 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
             free_image(val[t]);
             free_image(val_resized[t]);
         }
+        clock_gettime(CLOCK_MONOTONIC, &img_finish);
+        img_elapsed += (img_finish.tv_sec - img_start.tv_sec);
+        img_elapsed += (img_finish.tv_nsec - img_start.tv_nsec) / 1000000000.0;
+        
     }
     for(j = 0; j < classes; ++j){
         if(fps) fclose(fps[j]);
@@ -357,7 +376,14 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
         fprintf(fp, "\n]\n");
         fclose(fp);
     }
-    fprintf(stderr, "Total Detection Time: %f Seconds\n", (double)(time(0) - start));
+    
+    fprintf(stderr, "Total Load Time: %f Seconds\n", (float)(load_elapsed));
+    fprintf(stderr, "Total Image Time: %f Seconds\n", (float)(img_elapsed));
+        
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    total_elapsed = (finish.tv_sec - start.tv_sec);
+    total_elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    fprintf(stderr, "Total Detection Time: %f Seconds\n", (float)(total_elapsed));
 }
 
 void validate_detector_recall(char *cfgfile, char *weightfile)

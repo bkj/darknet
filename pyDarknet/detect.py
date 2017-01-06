@@ -40,13 +40,18 @@ if __name__ == "__main__":
     print class_names
     
     start = time()
+    c_load_time, c_pred_time = 0, 0
     for i,im_name in enumerate(sys.stdin):
-        print >> sys.stderr, "Processed %d images in %f seconds" % (i, time() - start)
+        py_all_time = time() - start
+        py_load_time = py_all_time - c_load_time - c_pred_time
+        print >> sys.stderr, "%d | pyall %f | pyload %f | cload %f | cpred %f" % (i, py_all_time, py_load_time, c_load_time, c_pred_time)
         
         try:
             im_name = im_name.strip()
             img = Image.open(im_name)
-            rst, run_time = det.detect_object(*det.format_image(img))
+            rst, load_time, pred_time = det.detect_object(*det.format_image(img))
+            c_load_time += load_time
+            c_pred_time += pred_time
             
             for bbox in rst:
                 class_name = class_names[bbox.cls]
