@@ -1,4 +1,8 @@
-# Params
+#!/bin/bash
+
+# train.sh
+#
+# Train `yolo` model
 
 # !! Should deploy data for negative annotations (eg empty images)
 # !! Should remove all mortar annotations (doesn't really work)
