@@ -94,14 +94,18 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--indir', type=str, required=True)
     parser.add_argument('--outdir', type=str, required=True)
+    parser.add_argument('--keep-empty', action='store_true')
     return parser.parse_args()
 
-def merge_anns(all_anns):
+def merge_anns(all_anns, keep_empty=False):
     anns = defaultdict(list)
     for these_anns in all_anns:
         for a in these_anns:
-            if len(a['annotations']) > 0:
+            if keep_empty:
                 anns[a['filename']] += a['annotations']
+            else:
+                if len(a['annotations']) > 0:
+                    anns[a['filename']] += a['annotations']
     
     anns = [{'filename':k, 'class':'image', 'annotations':v} for k,v in anns.items()]
     return anns
@@ -119,16 +123,17 @@ if __name__ == "__main__":
         im_lookup[os.path.basename(im_path)] = im_path
 
     all_anns = [json.load(open(os.path.join(indir, 'anns.json'))) for indir in indirs]
-    anns = merge_anns(all_anns)
+    anns = merge_anns(all_anns, keep_empty=args.keep_empty)
     
     for ann in anns:
+        
         # Find source image
-        im_path = im_lookup[ann['filename']]
-        
-        # Write annotations
-        filename, xml = make_xml(ann, im_path)
-        open(os.path.join(args.outdir, 'annotations', filename), 'w').write(xml)
-        
-        # Move images
-        shutil.copy(im_path, os.path.join(img_out, ann['filename']))
+        im_path = im_lookup.get(ann['filename'])
+        if im_path:
+            # Write annotations
+            filename, xml = make_xml(ann, im_path)
+            open(os.path.join(args.outdir, 'annotations', filename), 'w').write(xml)
+            
+            # Move images
+            shutil.copy(im_path, os.path.join(img_out, ann['filename']))
 

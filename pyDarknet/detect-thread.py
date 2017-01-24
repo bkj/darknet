@@ -23,7 +23,7 @@ from detector import DetBBox
 defaults = {
     "name_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/custom.names',
     "cfg_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/yolo-custom.cfg',
-    "weight_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/backup/yolo-custom_10000.weights'    ,
+    "weight_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/backup/yolo-custom_10000.weights',
 }
 
 def parse_args():
@@ -31,8 +31,8 @@ def parse_args():
     parser.add_argument('--name-path', type=str, default=defaults['name_path'])
     parser.add_argument('--cfg-path', type=str, default=defaults['cfg_path'])
     parser.add_argument('--weight-path', type=str, default=defaults['weight_path'])
-    parser.add_argument('--thresh', type=float, default=0.5)
-    parser.add_argument('--nms', type=float, default=0.4)
+    parser.add_argument('--thresh', type=float, default=0.1)
+    parser.add_argument('--nms', type=float, default=0.3)
     parser.add_argument('--n-threads', type=float, default=10)
     parser.add_argument('--draw', action='store_true')
     return parser.parse_args()
@@ -47,16 +47,20 @@ def prep_images(in_, out_, det):
             except KeyboardInterrupt:
                 raise
             except:
-                print >> sys.stderr, "Error @ %s" % im_name
+                print >> sys.stderr, "Error: Cannot load @ %s" % im_name
+        
+        except KeyboardInterrupt:
+            raise
+        
         except Empty:
             return
-    
+
 
 def read_stdin(gen, out_):
     for line in gen:
         line = line.strip()
         out_.put(line)
-    
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -65,7 +69,7 @@ if __name__ == "__main__":
     det = ObjectDetector(args.cfg_path, args.weight_path, args.thresh, args.nms, int(args.draw))
     
     class_names = open(args.name_path).read().splitlines()
-    print class_names
+    print >> sys.stderr, "class_names = %s" % "\t".join(class_names)
     
     # Thread to read from std
     filenames = Queue()
@@ -92,16 +96,21 @@ if __name__ == "__main__":
         
         try:
             im_name, img = processed_images.get(timeout=5)
-            rst, load_time, pred_time = det.detect_object(*img)
+            detections, load_time, pred_time = det.detect_object(*img)
             c_load_time += load_time
             c_pred_time += pred_time
             
-            for bbox in rst:
+            for bbox in detections:
                 class_name = class_names[bbox.cls]
                 res = [im_name, class_name, bbox.confidence, bbox.top, bbox.left, bbox.bottom, bbox.right]
                 print '\t'.join(map(str, res))
                 sys.stdout.flush()
+        
+        except KeyboardInterrupt:
+            raise
+        
         except Empty:
             os._exit(0)
+        
         except:
             pass

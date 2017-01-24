@@ -5,10 +5,13 @@
 # Train `yolo` model
 
 # !! Should deploy data for negative annotations (eg empty images)
+#   I think this is done
 # !! Should remove all mortar annotations (doesn't really work)
 
 # Convert `sloth` format to `VOC` and copy annotated images to directory
-./utils/sloth2voc.py --indir ./source-data --outdir ./pfr-data
+./utils/sloth2voc.py --indir ./source-data --outdir ./pfr-data --keep-empty
+
+# !! To train on VOC as well, copy `Annotations` and `JPEGImages` to `annotations` and `images`
 
 # Make train/test split
 ./utils/train-test-split.py --indir ./pfr-data --keep-extensions
