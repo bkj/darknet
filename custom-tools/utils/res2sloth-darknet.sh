@@ -1,10 +1,37 @@
 #!/bin/bash
 
-cat ../pyDarknet/results/results-yolo-custom_* | fgrep flag | sort -k2 -nr | ./utils/res2sloth-darknet.py  --output ./darknet-output/flag --class flag
-cat ../pyDarknet/results/results-yolo-custom_* | fgrep explosion | sort -k2 -nr | ./utils/res2sloth-darknet.py  --output ./darknet-output/explosion --class explosion
-cat ../pyDarknet/results/results-yolo-custom_* | fgrep combat_vehicle | sort -k2 -nr | ./utils/res2sloth-darknet.py  --output ./darknet-output/combat_vehicle --class combat_vehicle
-cat ../pyDarknet/results/results-yolo-custom_* | fgrep long_gun | sort -k2 -nr | ./utils/res2sloth-darknet.py  --output ./darknet-output/long_gun --class long_gun
+INPATH='../pyDarknet/results/f-results-yolo-custom_final'
 
-tar -cf darknet-output.tar darknet-output
+rm -r darknet-output
 
-# SCP to local machine and annotate
+ANNPATH='/home/bjohnson/projects/py-faster-rcnn/custom-tools/output/eval-f/flag/anns.json'
+cat $ANNPATH | jq --slurp -rc ".[] | .[] | if(.annotations | length > 0) then . else null end //empty | .filename" > .tmp
+wc -l tmp
+cat $INPATH | grep flag | sort -k3 -nr | grep -v -f .tmp |\
+    ./utils/res2sloth-darknet.py --output ./darknet-output/f-final/flag --class flag
+
+ANNPATH='/home/bjohnson/projects/py-faster-rcnn/custom-tools/output/eval-f/explosion/anns.json'
+cat $ANNPATH | jq --slurp -rc ".[] | .[] | if(.annotations | length > 0) then . else null end //empty | .filename" > .tmp
+wc -l tmp
+cat $INPATH | grep explosion | sort -k3 -nr | grep -v -f .tmp |\
+    ./utils/res2sloth-darknet.py --output ./darknet-output/f-final/explosion --class explosion
+
+ANNPATH='/home/bjohnson/projects/py-faster-rcnn/custom-tools/output/eval-f/gun/anns.json'
+cat $ANNPATH | jq --slurp -rc ".[] | .[] | if(.annotations | length > 0) then . else null end //empty | .filename" > .tmp
+wc -l tmp
+cat $INPATH | grep long_gun | sort -k3 -nr | grep -v -f .tmp |\
+    ./utils/res2sloth-darknet.py --output ./darknet-output/f-final/long_gun --class long_gun
+
+ANNPATH='/home/bjohnson/projects/py-faster-rcnn/custom-tools/output/eval-f/vehicle/anns.json'
+cat $ANNPATH | jq --slurp -rc ".[] | .[] | if(.annotations | length > 0) then . else null end //empty | .filename" > .tmp
+wc -l tmp
+cat $INPATH | grep combat_vehicle | sort -k3 -nr | grep -v -f .tmp |\
+    ./utils/res2sloth-darknet.py --output ./darknet-output/f-final/combat_vehicle --class combat_vehicle
+
+rm .tmp
+
+cd darknet-output
+tar -cf darknet-f-final.tar f-final
+
+# Annotate
+
