@@ -1,0 +1,21 @@
+{
+  "image_name": "darknet_object_detector",
+  "description": "CNN based object detector -- darknet",
+  
+  "class" : "darknet_model.py",
+  "model" : "model",
+  "model_name" : "darknet_object_detector_v0",
+  "additional" : ["test_api.sh", "README.md"],
+  
+  "rest_args": [
+    {
+      "field": "urls",
+      "location": "json",
+      "type": "list"
+    }
+  ],
+  "base_image" : "hub.dsra.local:5000/bkj/darknet:latest",
+  "gpu_flag" : 1,
+  "legacy_flag" : 1,
+  "wrapper_version" : 2
+}

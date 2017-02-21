@@ -1,3 +1,5 @@
+docker/model/*
+docker/docker-wrapper/*
 darknet19_448.conv.23
 VOCdevkit/
 custom-tools/pfr-data/
