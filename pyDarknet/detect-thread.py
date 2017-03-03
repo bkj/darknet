@@ -18,12 +18,12 @@ from multiprocessing import Process, Queue
 from Queue import Empty
 
 from detector import Darknet_ObjectDetector as ObjectDetector
-from detector import DetBBox
+from detector import DetBBox, format_image
 
 defaults = {
-    "name_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/custom.names',
-    "cfg_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/yolo-custom.cfg',
-    "weight_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/backup/yolo-custom_10000.weights',
+    "name_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data.bak/custom.names',
+    "cfg_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data.bak/yolo-custom.cfg',
+    "weight_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data.bak/backup/yolo-custom_10000.weights',
 }
 
 def parse_args():
@@ -33,9 +33,10 @@ def parse_args():
     parser.add_argument('--weight-path', type=str, default=defaults['weight_path'])
     parser.add_argument('--thresh', type=float, default=0.1)
     parser.add_argument('--nms', type=float, default=0.3)
-    parser.add_argument('--n-threads', type=float, default=10)
+    parser.add_argument('--n-threads', type=int, default=10)
     parser.add_argument('--draw', action='store_true')
     return parser.parse_args()
+
 
 def prep_images(in_, out_, det):
     while True:
@@ -43,7 +44,7 @@ def prep_images(in_, out_, det):
             im_name = in_.get(timeout=5)
             try:
                 pil_image = Image.open(im_name)
-                out_.put((im_name, det.format_image(pil_image)))
+                out_.put((im_name, format_image(pil_image)))
             except KeyboardInterrupt:
                 raise
             except:
@@ -91,7 +92,7 @@ if __name__ == "__main__":
         py_load_time = py_all_time - c_load_time - c_pred_time
         i += 1
         
-        if not i % 100:
+        if not i % 1:
             print >> sys.stderr, "%d | pyall %f | pyload %f | cload %f | cpred %f" % (i, py_all_time, py_load_time, c_load_time, c_pred_time)
         
         try:

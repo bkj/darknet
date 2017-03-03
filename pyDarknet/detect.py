@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
     detect.py
     
@@ -11,12 +13,12 @@ from time import time
 from PIL import Image
 
 from detector import Darknet_ObjectDetector as ObjectDetector
-from detector import DetBBox
+from detector import DetBBox, format_image
 
 defaults = {
-    "name_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/custom.names',
-    "cfg_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/yolo-custom.cfg',
-    "weight_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data/backup/yolo-custom_10000.weights'    ,
+    "name_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data.bak/custom.names',
+    "cfg_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data.bak/yolo-custom.cfg',
+    "weight_path" : '/home/bjohnson/projects/darknet-bkj/custom-tools/pfr-data.bak/backup/yolo-custom_10000.weights'    ,
 }
 
 def parse_args():
@@ -49,15 +51,16 @@ if __name__ == "__main__":
         try:
             im_name = im_name.strip()
             img = Image.open(im_name)
-            rst, load_time, pred_time = det.detect_object(*det.format_image(img))
-            c_load_time += load_time
-            c_pred_time += pred_time
+            img = format_image(img)
+            rst, load_time, pred_time = det.detect_object(*img)
+            # c_load_time += load_time
+            # c_pred_time += pred_time
             
-            for bbox in rst:
-                class_name = class_names[bbox.cls]
-                res = [im_name, class_name, bbox.confidence, bbox.top, bbox.left, bbox.bottom, bbox.right]
-                print '\t'.join(map(str, res))
-                sys.stdout.flush()
+            # for bbox in rst:
+            #     class_name = class_names[bbox.cls]
+            #     res = [im_name, class_name, bbox.confidence, bbox.top, bbox.left, bbox.bottom, bbox.right]
+            #     print '\t'.join(map(str, res))
+            #     sys.stdout.flush()
         
         except KeyboardInterrupt:
             raise

@@ -13,6 +13,16 @@ import sys
 import numpy as np
 from PIL import Image
 
+
+def format_image(pil_image, resize=True, net_size=416):
+    pil_image = pil_image.convert('RGB')
+    
+    if resize:
+        pil_image = pil_image.resize((net_size, net_size), Image.BILINEAR)
+    
+    data = np.array(pil_image).transpose([2,0,1]).astype(np.uint8).tostring()
+    return data, (pil_image.size[0], pil_image.size[1])
+
 class DetBBox(object):
     
     def __init__(self, bbox):
@@ -25,19 +35,8 @@ class DetBBox(object):
 
 class Darknet_ObjectDetector():
     
-    def __init__(self, spec, weight, thresh=0.5, nms=0.4, draw=0, py_resize=True, net_size=416):
+    def __init__(self, spec, weight, thresh=0.5, nms=0.4, draw=0):
         self._detector = DarknetObjectDetector(spec, weight, thresh, nms, draw)
-        self.py_resize = py_resize
-        self.net_size = net_size
-    
-    def format_image(self, pil_image):
-        pil_image = pil_image.convert('RGB')
-        
-        if self.py_resize:
-            pil_image = pil_image.resize((self.net_size, self.net_size), Image.BILINEAR)
-        
-        data = np.array(pil_image).transpose([2,0,1]).astype(np.uint8).tostring()
-        return data, (pil_image.size[0], pil_image.size[1])
     
     def detect_object(self, data, size):
         res = self._detector.detect_object(data, size[0], size[1], 3)

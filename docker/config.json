@@ -16,6 +16,5 @@
   ],
   "base_image" : "hub.dsra.local:5000/bkj/darknet:latest",
   "gpu_flag" : 1,
-  "legacy_flag" : 1,
   "wrapper_version" : 2
 }
