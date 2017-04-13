@@ -69,5 +69,9 @@ class apiModel():
         return results
     
     def predict_api(self, urls):
+        urls = filter(None, urls)
+        if len(urls) == 0:
+            return []
+        
         results = [self._predict_api(url) for url in urls]
         return [obj for image in results for obj in image]
