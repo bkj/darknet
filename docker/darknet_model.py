@@ -69,6 +69,7 @@ class apiModel():
         return results
     
     def predict_api(self, urls):
+        urls = urls or []
         urls = filter(None, urls)
         if len(urls) == 0:
             return []
