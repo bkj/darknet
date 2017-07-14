@@ -3,6 +3,7 @@
 import os
 import sys
 import urllib
+import contextlib
 import cStringIO
 import numpy as np
 
@@ -19,9 +20,9 @@ from detector import DetBBox
 
 def url_to_image(url):
     try:
-        with urllib.urlopen(url) as req:
-            localURL = cStringIO.StringIO(req).read())
-        image = Image.open(localURL)
+        with contextlib.closing(urllib.urlopen(url)) as req:
+            local_url = cStringIO.StringIO(req).read())
+        image = Image.open(local_url)
         if not image:
             abort(504)
 
