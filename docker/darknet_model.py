@@ -21,7 +21,7 @@ from detector import DetBBox
 def url_to_image(url):
     try:
         with contextlib.closing(urllib.urlopen(url)) as req:
-            local_url = cStringIO.StringIO(req).read())
+            local_url = cStringIO.StringIO(req.read())
         image = Image.open(local_url)
         if not image:
             abort(504)
